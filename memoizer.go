@@ -32,14 +32,23 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
     		classHandle.ReqQ <- req
     		finalResp := <-classHandle.RespQ
 
+    		if finalResp.Id != req.Id {
+    			finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCorrupt, "Classifier Error", finalResp.Err)
+    		}
+
     		cacheWriteReq := proj5.CacheReq{true, reqKey, finalResp.Val, req.Id}
     		cacheHandle.ReqQ <- cacheWriteReq
 
     		memHandle.RespQ <- finalResp
     	}
 
+    	
+
 		/*classHandle.ReqQ <- req
 		resp := <-classHandle.RespQ
 		memHandle.RespQ <- resp*/
 	}
+	close(memHandle.RespQ)
+	close(cacheHandle.RespQ)
+	close(classHandle.RespQ)
 }
