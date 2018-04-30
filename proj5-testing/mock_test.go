@@ -349,8 +349,8 @@ func checkCacheCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 	reqID++
 
 	// The whenFail'th miss and requests after should work fine too
-	// Check 10 images
-    for i := 0; i < 10; i++ {
+	// Check 100 images
+    for i := 0; i < 100; i++ {
 		handle.ReqQ <- proj5.MnistReq{ims[whenFail + i], reqID}
 		resp, ok := <-handle.RespQ
 		if !ok {
