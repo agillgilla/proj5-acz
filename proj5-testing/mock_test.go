@@ -238,7 +238,7 @@ func mockClassifierCrash(handle proj5.MnistHandle, t *testing.T) {
 
 		if reqCount == whenFail {
 			// Close respQ on whenFail'd request
-			close(handle.RespQ)
+			return
 		} else {
 			// Normal behavior
 			handle.RespQ <- proj5.MnistResp{lbl, req.Id, nil}
@@ -360,6 +360,92 @@ func checkCacheCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 
 		if resp.Err != nil {
 			t.Error("Memoizer returned and error when cache crashed")
+			t.FailNow()
+		}
+
+		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
+		reqID++
+	}
+
+}
+
+// Bad mock cache.  Sends duplicate ID on whenFail'd request
+func mockCacheCrash(handle proj5.CacheHandle, t *testing.T) {
+	// Create a real cache to use behind the scenes
+	realHandle := proj5.CacheHandle{
+		make(chan proj5.CacheReq, bufSize),
+		make(chan proj5.CacheResp, bufSize),
+	}
+	go proj5.Cache(realHandle)
+	defer close(realHandle.ReqQ)
+	defer close(handle.RespQ)
+
+	// Used to ensure that memoizer doesn't mess up IDs some how
+	// I'm using the empty struct (struct{}) just as a place holder, we'll only
+	// ever test for existence in the map (it's more like a set than a map)
+	seenIds := make(map[int64]struct{})
+
+	reqCount := 0
+
+	for req := range handle.ReqQ {
+		
+		reqCount++
+
+		// Check for duplicate IDs (only for reads)
+		if req.Write == false {
+			if _, found := seenIds[req.Id]; found == true {
+				t.Errorf("Repeated ID: %d", req.Id)
+			} else {
+				seenIds[req.Id] = struct{}{}
+			}
+		}
+
+		// Then just proxy to the real cache (for reads)
+		realHandle.ReqQ <- req
+		if req.Write == false {
+			resp := <-realHandle.RespQ
+			if reqCount == whenFail { // Give response with bad ID on whenFail
+				resp.ID += int64(42)
+			}
+			handle.RespQ <- resp
+		}
+
+
+	}
+}
+
+// Checks if the memoizer behaves badly when cache returns bad ID
+func checkCacheBadID(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing.T) {
+	var reqID int64 = 0
+
+	// Pre-compute the expected value for the first whenFail values
+	exp := make([]int, whenFail*2)
+	for i, im := range ims[:whenFail*2] {
+		exp[i] = lblIm(im)
+	}
+
+	// The first whenFail-1 misses should work as normal
+	proj5.CheckImages(ims[:whenFail-1], exp, handle, &reqID, t)
+
+	reqID++
+
+	// The whenFail'th request should get a bad ID, but memoizer should use classifer instead of forwarding bad ID
+	// Check the same image 100 times
+    for i := 0; i < 100; i++ {
+		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
+		resp, ok := <-handle.RespQ
+		if !ok {
+			t.Error("Memoizer exited after cache returned bad ID.")
+			t.FailNow()
+		}
+
+		if resp.Err != nil {
+			t.Error("Memoizer returned and error when cache gave a bad ID (should have used classifier)")
+			t.FailNow()
+		}
+
+		if resp.ID != reqID {
+			t.Error("Memoizer forwarded a bad ID from the cache")
 			t.FailNow()
 		}
 
