@@ -273,6 +273,8 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 			t.Error("Memoizer reported an error after classifier crashed, but request was in cache!")
 			t.FailNow()
 		}
+
+		reqID++
 	}
 
 }
