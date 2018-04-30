@@ -274,6 +274,10 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 			t.FailNow()
 		}
 
+		if resp.Val != exp[seenPicIndex] {
+			t.Error("Memoizer returned incorrect value after classifier crashed, but request was in cache!")
+		}
+
 		reqID++
 	}
 
