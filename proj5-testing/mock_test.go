@@ -53,6 +53,10 @@ func TestMocks(t *testing.T) {
 	t.Run("CacheCrash", func(t *testing.T) {
 		runMockTest(mockClassifierGood, mockCacheCrash, checkCacheCrash, rawTrain.Images, t)
 	})
+
+	t.Run("CacheBadID", func(t *testing.T) {
+		runMockTest(mockClassifierGood, mockCacheBadID, checkCacheBadID, rawTrain.Images, t)
+	})
 }
 
 // Well-behaved classifier, doesn't do anything unusual. Uses the lblIm
@@ -370,7 +374,7 @@ func checkCacheCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 }
 
 // Bad mock cache.  Sends duplicate ID on whenFail'd request
-func mockCacheCrash(handle proj5.CacheHandle, t *testing.T) {
+func mockCacheBadID(handle proj5.CacheHandle, t *testing.T) {
 	// Create a real cache to use behind the scenes
 	realHandle := proj5.CacheHandle{
 		make(chan proj5.CacheReq, bufSize),
