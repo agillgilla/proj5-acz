@@ -409,7 +409,7 @@ func mockCacheBadID(handle proj5.CacheHandle, t *testing.T) {
 		if req.Write == false {
 			resp := <-realHandle.RespQ
 			if reqCount == whenFail { // Give response with bad ID on whenFail
-				resp.ID += int64(42)
+				resp.Id += int64(42)
 			}
 			handle.RespQ <- resp
 		}
@@ -448,7 +448,7 @@ func checkCacheBadID(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 			t.FailNow()
 		}
 
-		if resp.ID != reqID {
+		if resp.Id != reqID {
 			t.Error("Memoizer forwarded a bad ID from the cache")
 			t.FailNow()
 		}
