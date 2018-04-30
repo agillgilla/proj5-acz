@@ -6,6 +6,8 @@ import (
 
 	"github.com/61c-teach/sp18-proj5"
 	"github.com/petar/GoMNIST"
+
+	"math/rand"
 )
 
 // Some of the mocks use this fake classifier that is simple, but consistent.
@@ -42,6 +44,10 @@ func TestMocks(t *testing.T) {
 
 	t.Run("ClassBadID", func(t *testing.T) {
 		runMockTest(mockClassifierBadID, mockCacheGood, checkClassBadId, rawTrain.Images, t)
+	})
+
+	t.Run("ClassCrash", func(t *testing.T) {
+		runMockTest(mockClassifierCrash, mockCacheGood, checkClassCrash, rawTrain.Images, t)
 	})
 }
 
@@ -199,4 +205,69 @@ func checkClassBadId(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 
 	// Retry the request (should succeed)
 	proj5.CheckImage(ims[whenFail], exp[whenFail], handle, &reqID, t)
+}
+
+// Bad classifier, failes on the whenFail'd request
+func mockClassifierCrash(handle proj5.MnistHandle, t *testing.T) {
+	defer close(handle.RespQ)
+
+	// Used to ensure that memoizer doesn't mess up IDs some how
+	// I'm using the empty struct (struct{}) just as a place holder, we'll only
+	// ever test for existence in the map (it's more like a set than a map)
+	seenIds := make(map[int64]struct{})
+
+	reqCount := 0
+
+	for req := range handle.ReqQ {
+		// Use the first byte of the image % 10 as the label (keep in mind none of
+		// our tests actually check that the classifier is actually accurate, just
+		// that it's consistent).
+		lbl := lblIm(req.Val)
+
+		if _, found := seenIds[req.Id]; found == true {
+			t.Errorf("Repeated ID: %d", req.Id)
+		} else {
+			seenIds[req.Id] = struct{}{}
+		}
+
+		reqCount++
+
+		if reqCount == whenFail {
+			// Close respQ on whenFail'd request
+			close(handle.RespQ)
+		} else {
+			// Normal behavior
+			handle.RespQ <- proj5.MnistResp{lbl, req.Id, nil}
+		}
+		
+	}
+}
+
+func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing.T) {
+	var reqID int64 = 0
+
+	// Pre-compute the expected value for the first whenFail values
+	exp := make([]int, whenFail*2)
+	for i, im := range ims[:whenFail*2] {
+		exp[i] = lblIm(im)
+	}
+
+	// The first whenFail-1 misses should work as normal
+	proj5.CheckImages(ims[:whenFail-1], exp, handle, &reqID, t)
+
+    seenPicIndex := rand.Intn(whenFail - 1)
+
+	// The whenFail'th miss should have a classifier crash, but it should work fine since a previous
+	// element should be cached.
+	handle.ReqQ <- proj5.MnistReq{ims[seenPicIndex], reqID}
+	resp, ok := <-handle.RespQ
+	if !ok {
+		t.Error("Memoizer exited after classifier crashed.")
+	}
+
+	if resp.Err != nil {
+		t.Error("Memoizer reported an error after classifier crashed, but request was in cache!")
+		t.FailNow()
+	}
+
 }
