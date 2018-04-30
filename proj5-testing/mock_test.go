@@ -349,9 +349,9 @@ func checkCacheCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 	reqID++
 
 	// The whenFail'th miss and requests after should work fine too
-	// Check 100 images
-    for i := 0; i < whenFail; i++ {
-		handle.ReqQ <- proj5.MnistReq{ims[whenFail + i], reqID}
+	// Check the same image 20 times
+    for i := 0; i < 20; i++ {
+		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
 		resp, ok := <-handle.RespQ
 		if !ok {
 			t.Error("Memoizer exited after cache crashed.")
