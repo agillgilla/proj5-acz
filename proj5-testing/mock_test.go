@@ -355,6 +355,7 @@ func checkCacheCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		resp, ok := <-handle.RespQ
 		if !ok {
 			t.Error("Memoizer exited after cache crashed.")
+			t.FailNow()
 		}
 
 		if resp.Err != nil {
