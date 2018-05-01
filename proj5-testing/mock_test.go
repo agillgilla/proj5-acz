@@ -222,6 +222,7 @@ func checkClassBadId(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 // Bad classifier, failes on the whenFail'd request
 func mockClassifierCrash(handle proj5.MnistHandle, t *testing.T) {
 	defer close(handle.RespQ)
+	defer fmt.Println("The clasifier just died")
 
 	// Used to ensure that memoizer doesn't mess up IDs some how
 	// I'm using the empty struct (struct{}) just as a place holder, we'll only
