@@ -61,6 +61,10 @@ func TestMocks(t *testing.T) {
 	t.Run("BothCrash", func(t *testing.T) {
 		runMockTest(mockClassifierCrash, mockCacheCrash, checkBothCrash, rawTrain.Images, t)
 	})
+
+	t.Run("ClassErr", func(t *testing.T) {
+		runMockTest(mockClassifierError, mockCacheGood, checkClassError, rawTrain.Images, t)
+	})
 }
 
 // Well-behaved classifier, doesn't do anything unusual. Uses the lblIm
@@ -535,5 +539,91 @@ func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing
 		reqID++
 	}
 
+}
+
+// This classifier gives a garbage error for any request after the whenFail'd request (including the whenFail'd request)
+func mockClassifierError(handle proj5.MnistHandle, t *testing.T) {
+	defer close(handle.RespQ)
+
+
+	reqCount := 0
+	
+	for req := range handle.ReqQ {
+		// Use the first byte of the image % 10 as the label (keep in mind none of
+		// our tests actually check that the classifier is actually accurate, just
+		// that it's consistent).
+		lbl := lblIm(req.Val)
+
+		reqCount++
+		if reqCount >= whenFail {
+			randomErr := reqCount % 5
+			switch randomErr {
+				case 0:
+					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.MemErr_none}
+				case 1:
+					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.MemErr_serErr}
+				case 2:
+					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.MemErr_serCrash}
+				case 3:
+					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.MemErr_serCorrupt}
+				case 4:	
+					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.MemErr_badArg}
+			}	
+		} else {
+			handle.RespQ <- proj5.MnistResp{lbl, req.Id, nil}
+		}
+	}
+
+}
+
+// Checks if the memoizer correctly forwards errors outputted by bad classifier
+func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing.T) {
+	var reqID int64 = 0
+
+	// Pre-compute the expected value for the first whenFail values
+	exp := make([]int, whenFail*2)
+	for i, im := range ims[:whenFail*2] {
+		exp[i] = lblIm(im)
+	}
+
+	// The first whenFail-1 misses should work as normal
+	proj5.CheckImages(ims[:whenFail-1], exp, handle, &reqID, t)
+
+	// Check the same image 100 times
+    for i := 0; i < 20; i++ {
+		// The whenFail'th miss (and those after) should have an error
+		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
+		resp, ok := <-handle.RespQ
+		if !ok {
+			t.Error("Memoizer exited after classifier gave bad error.")
+		}
+
+		if resp.Err == nil {
+			t.Error("Memoizer didn't report an error when classifier gave an error")
+			t.FailNow()
+		}
+
+		randomErr := reqID % 5
+		randomErrType := proj5.MemErr_none
+		switch randomErr {
+			case 0:
+				randomErrType = proj5.MemErr_none
+			case 1:
+				randomErrType = proj5.MemErr_serErr
+			case 2:
+				randomErrType = proj5.MemErr_serCrash
+			case 3:
+				randomErrType = proj5.MemErr_serCorrupt
+			case 4:	
+				randomErrType = proj5.MemErr_badArg
+		}
+
+		cause := proj5.GetErrCause(resp.Err)
+		if cause != randomErrType {
+			t.Errorf("Memoizer returned incorrect error cause. Expected %v, got %v", randomErrType, cause)
+		}
+		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
+		reqID++
+	}
 
 }
