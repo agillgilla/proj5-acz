@@ -604,23 +604,23 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		}
 
 		randomErr := reqID % 5
-		randomErrType := proj5.MemErr_none
+		randomMemErr := proj5.CreateMemErr(proj5.MemErr_none, "", nil)
 		switch randomErr {
 			case 0:
-				randomErrType = proj5.MemErr_none
+				randomMemErr.cause = proj5.MemErr_none
 			case 1:
-				randomErrType = proj5.MemErr_serErr
+				randomMemErr.cause = proj5.MemErr_serErr
 			case 2:
-				randomErrType = proj5.MemErr_serCrash
+				randomMemErr.cause = proj5.MemErr_serCrash
 			case 3:
-				randomErrType = proj5.MemErr_serCorrupt
+				randomMemErr.cause = proj5.MemErr_serCorrupt
 			case 4:	
-				randomErrType = proj5.MemErr_badArg
+				randomMemErr.cause = proj5.MemErr_badArg
 		}
 
 		cause := proj5.GetErrCause(resp.Err)
-		if cause != randomErrType {
-			t.Errorf("Memoizer returned incorrect error cause. Expected %v, got %v", randomErrType, cause)
+		if cause != randomMemErr.cause {
+			t.Errorf("Memoizer returned incorrect error cause. Expected %v, got %v", randomMemErr.cause, cause)
 		}
 		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
 		reqID++
