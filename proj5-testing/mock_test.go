@@ -295,7 +295,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 	}
 
 	// Check non-cached images (should return and error)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
     	
 		// The whenFail'th miss should have a classifier crash, and it should fail
 		// since the whenFail'th item isn't cached
