@@ -556,7 +556,7 @@ func mockClassifierError(handle proj5.MnistHandle, t *testing.T) {
 
 		reqCount++
 		if reqCount >= whenFail {
-			randomErr := reqCount % 4
+			/*randomErr := reqCount % 4
 			switch randomErr {
 				case 0:
 					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serErr, "", nil)}
@@ -566,7 +566,8 @@ func mockClassifierError(handle proj5.MnistHandle, t *testing.T) {
 					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serCorrupt, "", nil)}
 				case 3:	
 					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_badArg, "", nil)}
-			}	
+			}	*/
+			handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serCorrupt, "", nil)}
 		} else {
 			handle.RespQ <- proj5.MnistResp{lbl, req.Id, nil}
 		}
@@ -601,7 +602,7 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 			t.FailNow()
 		}
 
-		randomErr := reqID % 4
+		/*randomErr := reqID % 4
 		var randomMemErr proj5.MemErr
 		switch randomErr {
 			case 0:
@@ -614,11 +615,11 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 				randomMemErr = proj5.CreateMemErr(proj5.MemErr_badArg, "", nil)
 			default:
 				fmt.Printf("The random err is: %d", randomErr)
-		}
+		}*/
 
 		cause := proj5.GetErrCause(resp.Err)
-		if cause != proj5.GetErrCause(randomMemErr) {
-			t.Errorf("Memoizer returned incorrect error cause. Expected %v, got %v", proj5.GetErrCause(randomMemErr), cause)
+		if cause != proj5.MemErr_serCorrupt {
+			t.Errorf("Memoizer returned incorrect error cause. Expected MemErr_serCorrupt, got %v", cause)
 		}
 		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
 		reqID++
