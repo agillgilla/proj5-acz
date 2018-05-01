@@ -270,7 +270,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 
 
 	// Check 10 cached images
-    for i := 0; i < 20; i++ {
+    for i := 0; i < 100; i++ {
     	// Get a random index of a result that should be cached
 		seenPicIndex := rand.Intn(whenFail - 1)
 
