@@ -617,7 +617,7 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		}
 
 		cause := proj5.GetErrCause(resp.Err)
-		if cause != randomMemErr.cause {
+		if cause != proj5.GetErrCause(randomMemErr) {
 			t.Errorf("Memoizer returned incorrect error cause. Expected %v, got %v", randomMemErr.cause, cause)
 		}
 		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
