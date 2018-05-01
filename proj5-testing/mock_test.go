@@ -222,7 +222,7 @@ func checkClassBadId(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 // Bad classifier, fails on the whenFail'd request
 func mockClassifierCrash(handle proj5.MnistHandle, t *testing.T) {
 	defer close(handle.RespQ)
-	defer fmt.Println("The clasifier just died")
+	//defer fmt.Println("The clasifier just died")
 
 	// Used to ensure that memoizer doesn't mess up IDs some how
 	// I'm using the empty struct (struct{}) just as a place holder, we'll only
@@ -289,6 +289,25 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 
 		if resp.Val != exp[seenPicIndex] {
 			t.Error("Memoizer returned incorrect value after classifier crashed, but request was in cache!")
+		}
+
+		reqID++
+	}
+
+	// Check non-cached images (should return and error)
+	for i := 0; i < 10; i++ {
+    	
+		// The whenFail'th miss should have a classifier crash, and it should fail
+		// since the whenFail'th item isn't cached
+		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
+		resp, ok := <-handle.RespQ
+		if !ok {
+			t.Error("Memoizer exited after classifier crashed.")
+		}
+
+		if resp.Err == nil {
+			t.Error("Memoizer didn't report an error after classifier crashed, and request wasn't in cache!")
+			t.FailNow()
 		}
 
 		reqID++
