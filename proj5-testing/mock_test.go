@@ -493,8 +493,8 @@ func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing
 		}
 
 		cause := proj5.GetErrCause(resp.Err)
-		if cause != proj5.MemErr_serCorrupt {
-			t.Errorf("Memoizer returned incorrect error cause after both crash. Expected MemErr_serCorrupt, got %v", cause)
+		if cause != proj5.MemErr_serCrash {
+			t.Errorf("Memoizer returned incorrect error cause after both crash. Expected MemErr_serCrash, got %v", cause)
 			t.FailNow()
 		}
 		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
