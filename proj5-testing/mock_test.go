@@ -502,6 +502,5 @@ func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing
 		reqID++
 	}*/
 
-	// Retry the request (should succeed)
-	proj5.CheckImage(ims[whenFail], exp[whenFail], handle, &reqID, t)
+
 }
