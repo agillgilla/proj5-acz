@@ -602,7 +602,7 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		}
 
 		randomErr := reqID % 4
-		randomMemErr := nil
+		var randomMemErr proj5.MemErr
 		switch randomErr {
 			case 0:
 				randomMemErr = proj5.CreateMemErr(proj5.MemErr_serErr, "", nil)
