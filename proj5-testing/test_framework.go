@@ -5,7 +5,7 @@ import (
 	"time"
 
 	//memoizer "github.com/61c-teach/proj5-impls/memoizer_good"
-	memoizer "bitbucket.org/cs61c-acz/proj5-acz
+	memoizer "github.com/61c-teach/proj5-impls/memoizer_bothCrash"
 
 	proj5 "github.com/61c-teach/sp18-proj5"
 	"github.com/petar/GoMNIST"

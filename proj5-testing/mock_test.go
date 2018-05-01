@@ -57,6 +57,10 @@ func TestMocks(t *testing.T) {
 	t.Run("CacheBadID", func(t *testing.T) {
 		runMockTest(mockClassifierGood, mockCacheBadID, checkCacheBadID, rawTrain.Images, t)
 	})
+
+	t.Run("BothCrash", func(t *testing.T) {
+		runMockTest(mockClassifierCrash, mockCacheCrash, checkBothCrash, rawTrain.Images, t)
+	})
 }
 
 // Well-behaved classifier, doesn't do anything unusual. Uses the lblIm
@@ -457,4 +461,41 @@ func checkCacheBadID(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		reqID++
 	}
 
+}
+
+// Checks if the memoizer correctly forwards a bad ID when the classifier gives one
+func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing.T) {
+	var reqID int64 = 0
+
+	// Pre-compute the expected value for the first whenFail values
+	exp := make([]int, whenFail*2)
+	for i, im := range ims[:whenFail*2] {
+		exp[i] = lblIm(im)
+	}
+
+	// The first whenFail-1 misses should work as normal
+	proj5.CheckImages(ims[:whenFail-1], exp, handle, &reqID, t)
+
+	// Check the same image 100 times
+    for i := 0; i < 100; i++ {
+		// The whenFail'th miss should have an error
+		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
+		resp, ok := <-handle.RespQ
+
+		if resp.Err == nil {
+			t.Error("Memoizer didn't report an error when cache and classifier both crashed")
+			t.FailNow()
+		}
+
+		cause := proj5.GetErrCause(resp.Err)
+		if cause != proj5.MemErr_serCorrupt {
+			t.Errorf("Memoizer returned incorrect error cause after both crash. Expected MemErr_serCorrupt, got %v", cause)
+			t.FailNow()
+		}
+		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
+		reqID++
+	}
+
+	// Retry the request (should succeed)
+	proj5.CheckImage(ims[whenFail], exp[whenFail], handle, &reqID, t)
 }
