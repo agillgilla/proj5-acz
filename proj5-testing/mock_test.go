@@ -270,7 +270,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 
 
 	// Check 10 cached images
-    for i := 0; i < 10; i++ {
+    for i := 0; i < 20; i++ {
     	// Get a random index of a result that should be cached
 		seenPicIndex := rand.Intn(whenFail - 1)
 
@@ -295,7 +295,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 	}
 
 	// Check non-cached images (should return and error)
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 10; i++ {
     	
 		// The whenFail'th miss should have a classifier crash, and it should fail
 		// since the whenFail'th item isn't cached
