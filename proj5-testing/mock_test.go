@@ -294,7 +294,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		reqID++
 
 		handle.ReqQ <- proj5.MnistReq{ims[whenFail + i], reqID}
-		resp, ok := <-handle.RespQ
+		resp, ok = <-handle.RespQ
 		if !ok {
 			t.Error("Memoizer exited after classifier crashed.")
 		}
