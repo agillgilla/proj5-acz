@@ -567,7 +567,7 @@ func mockClassifierError(handle proj5.MnistHandle, t *testing.T) {
 				case 3:	
 					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_badArg, "", nil)}
 			}	*/
-			handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serCorrupt, "", nil)}
+			handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serErr, "", nil)}
 		} else {
 			handle.RespQ <- proj5.MnistResp{lbl, req.Id, nil}
 		}
@@ -618,8 +618,8 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		}*/
 
 		cause := proj5.GetErrCause(resp.Err)
-		if cause != proj5.MemErr_serCorrupt {
-			t.Errorf("Memoizer returned incorrect error cause. Expected MemErr_serCorrupt, got %v", cause)
+		if cause != proj5.MemErr_serErr {
+			t.Errorf("Memoizer returned incorrect error cause. Expected MemErr_serErr, got %v", cause)
 		}
 		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
 		reqID++
