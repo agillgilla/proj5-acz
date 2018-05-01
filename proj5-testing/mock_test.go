@@ -559,7 +559,7 @@ func mockClassifierError(handle proj5.MnistHandle, t *testing.T) {
 			randomErr := reqCount % 4
 			switch randomErr {
 				case 0:
-					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serError, "", nil)}
+					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serErr, "", nil)}
 				case 1:
 					handle.RespQ <- proj5.MnistResp{lbl, req.Id, proj5.CreateMemErr(proj5.MemErr_serCrash, "", nil)}
 				case 2:
