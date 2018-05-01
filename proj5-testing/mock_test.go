@@ -612,6 +612,8 @@ func checkClassError(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 				randomMemErr = proj5.CreateMemErr(proj5.MemErr_serCorrupt, "", nil)
 			case 3:	
 				randomMemErr = proj5.CreateMemErr(proj5.MemErr_badArg, "", nil)
+			default:
+				fmt.Printf("The random err is: %d", randomErr)
 		}
 
 		cause := proj5.GetErrCause(resp.Err)
