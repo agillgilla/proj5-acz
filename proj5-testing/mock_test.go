@@ -482,6 +482,11 @@ func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing
 		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
 		resp, ok := <-handle.RespQ
 
+		if !ok {
+			t.Error("Memoizer exited after cache and classifer crashed. Should have stayed open and returned errors.")
+			t.FailNow()
+		}
+
 		if resp.Err == nil {
 			t.Error("Memoizer didn't report an error when cache and classifier both crashed")
 			t.FailNow()
