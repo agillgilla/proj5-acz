@@ -478,7 +478,7 @@ func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing
 	proj5.CheckImages(ims[:whenFail-1], exp, handle, &reqID, t)
 
 	// Check the same image 100 times
-    /*for i := 0; i < 1; i++ {
+    for i := 0; i < 1; i++ {
 		// The whenFail'th miss should have an error
 		handle.ReqQ <- proj5.MnistReq{ims[whenFail], reqID}
 		resp, ok := <-handle.RespQ
@@ -500,7 +500,7 @@ func checkBothCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testing
 		}
 		// Note that the ID of this resp is allowed to be bad (although it shouldn't be if you can avoid it)
 		reqID++
-	}*/
+	}
 
 
 }
