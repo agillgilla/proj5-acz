@@ -276,7 +276,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 
 		// The whenFail'th miss should have a classifier crash, but it should work fine 
 		// since a previous element should be cached
-		handle.ReqQ <- proj5.MnistReq{ims[seenPicIndex], reqID}
+		/*handle.ReqQ <- proj5.MnistReq{ims[seenPicIndex], reqID}
 		resp, ok := <-handle.RespQ
 		if !ok {
 			t.Error("Memoizer exited after classifier crashed.")
@@ -291,7 +291,8 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 			t.Error("Memoizer returned incorrect value after classifier crashed, but request was in cache!")
 		}
 
-		reqID++
+		reqID++*/
+		proj5.CheckImage(ims[seenPicIndex], exp, handle, &reqID, t)
 	}
 
 	// Check non-cached images (should return and error)
@@ -313,30 +314,6 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		reqID++
 	}
 
-	// Check 10 cached images
-    for i := 0; i < 100; i++ {
-    	// Get a random index of a result that should be cached
-		seenPicIndex := rand.Intn(whenFail - 1)
-
-		// The whenFail'th miss should have a classifier crash, but it should work fine 
-		// since a previous element should be cached
-		handle.ReqQ <- proj5.MnistReq{ims[seenPicIndex], reqID}
-		resp, ok := <-handle.RespQ
-		if !ok {
-			t.Error("Memoizer exited after classifier crashed.")
-		}
-
-		if resp.Err != nil {
-			t.Error("Memoizer reported an error after classifier crashed, but request was in cache!")
-			t.FailNow()
-		}
-
-		if resp.Val != exp[seenPicIndex] {
-			t.Error("Memoizer returned incorrect value after classifier crashed, but request was in cache!")
-		}
-
-		reqID++
-	}
 
 }
 
