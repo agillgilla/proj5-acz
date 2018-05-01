@@ -292,7 +292,7 @@ func checkClassCrash(handle proj5.MnistHandle, ims []GoMNIST.RawImage, t *testin
 		}
 
 		reqID++*/
-		proj5.CheckImage(ims[seenPicIndex], exp, handle, &reqID, t)
+		proj5.CheckImage(ims[seenPicIndex], exp[seenPicIndex], handle, &reqID, t)
 	}
 
 	// Check non-cached images (should return and error)
