@@ -49,6 +49,6 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
 		memHandle.RespQ <- resp*/
 	}
 	close(memHandle.RespQ)
-	close(cacheHandle.RespQ)
-	close(classHandle.RespQ)
+	/*close(cacheHandle.RespQ)
+	close(classHandle.RespQ)*/
 }
