@@ -51,6 +51,8 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
                 finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCrash, "Classifier and Cache Crashed", nil)
             } else if !classifierOk && cacheOk {
                 finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCrash, "Classifier Crashed, result not in cache", nil)
+            } else if classifierOk && !cacheOk {
+                // Our cache crashed but our classifier is stil fine.  Don't need to do anything.
             } else if finalResp.Id != req.Id {
     			finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCorrupt, "Classifier Error", nil)
     		} else {
