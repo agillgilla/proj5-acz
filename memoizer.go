@@ -44,7 +44,7 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
 
             if classifierOk {
                 classHandle.ReqQ <- req
-                finalResp, ok := <-classHandle.RespQ
+                finalResp, ok = <-classHandle.RespQ
             }
 
             if !ok {
