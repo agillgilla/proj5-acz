@@ -45,9 +45,11 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
 
             if !classifierOk && !cacheOk {
                 finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCrash, "Classifier and Cache Crashed", finalResp.Err)
+            } else if !classifierOk && cacheOk {
+                finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCrash, "Classifier Crashed, result not in cache", finalResp.Err)
             } else if finalResp.Id != req.Id {
     			finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCorrupt, "Classifier Error", finalResp.Err)
-    		}
+    		} 
 
 
     		cacheWriteReq := proj5.CacheReq{true, reqKey, finalResp.Val, req.Id}
