@@ -28,7 +28,7 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
             cacheOk = false
         }
 
-    	if cacheOK && cacheResp.Exists { // Request is already in cache, read it from memory
+    	if cacheOk && cacheResp.Exists { // Request is already in cache, read it from memory
     		if cacheResp.Id == cacheReadReq.Id { // Id is correct (for out of order channel responses)
     			finalResp := proj5.MnistResp{cacheResp.Val, cacheReadReq.Id, nil}
     			memHandle.RespQ <- finalResp
