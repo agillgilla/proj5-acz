@@ -11,6 +11,9 @@ This doesn't even do memoization, it just proxies requests between the client
 and the classifier. You will need to improve this to use the cache effectively. */
 func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheHandle proj5.CacheHandle) {
 
+    classifierOk := true
+    cacheOk := true
+
 	for req := range memHandle.ReqQ {
 		crcTable := crc64.MakeTable(crc64.ECMA)
     	reqKey := crc64.Checksum(req.Val, crcTable)
@@ -19,9 +22,13 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
     	cacheReadReq := proj5.CacheReq{false, reqKey, 0, req.Id} 
     	cacheHandle.ReqQ <- cacheReadReq
     	
-    	cacheResp := <-cacheHandle.RespQ
+    	cacheResp, ok := <-cacheHandle.RespQ
 
-    	if cacheResp.Exists { // Request is already in cache, read it from memory
+        if !ok {
+            cacheOk = false
+        }
+
+    	if cacheOK && cacheResp.Exists { // Request is already in cache, read it from memory
     		if cacheResp.Id == cacheReadReq.Id { // Id is correct (for out of order channel responses)
     			finalResp := proj5.MnistResp{cacheResp.Val, cacheReadReq.Id, nil}
     			memHandle.RespQ <- finalResp
