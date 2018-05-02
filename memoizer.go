@@ -37,11 +37,18 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
     		}
     	} else { // Request is not in cache, calculate it and memoize it
     		classHandle.ReqQ <- req
-    		finalResp := <-classHandle.RespQ
+    		finalResp, ok := <-classHandle.RespQ
 
-    		if finalResp.Id != req.Id {
+            if !ok {
+                classifierOk = false
+            }
+
+            if !classifierOk && !cacheOk {
+                finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCrash, "Classifier and Cache Crashed", finalResp.Err)
+            } else if finalResp.Id != req.Id {
     			finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCorrupt, "Classifier Error", finalResp.Err)
     		}
+
 
     		cacheWriteReq := proj5.CacheReq{true, reqKey, finalResp.Val, req.Id}
     		cacheHandle.ReqQ <- cacheWriteReq
