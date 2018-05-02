@@ -21,7 +21,6 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
         var cacheResp proj5.CacheResp
         var ok bool
 
-
         cacheReadReq := proj5.CacheReq{false, reqKey, 0, req.Id} 
         if cacheOk {
         	cacheHandle.ReqQ <- cacheReadReq
@@ -40,8 +39,13 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
     			fmt.Printf("%s", "ERROR! Cache Response ID doesn't match Cache Request ID!")
     		}
     	} else { // Request is not in cache, calculate it and memoize it
-    		classHandle.ReqQ <- req
-    		finalResp, ok := <-classHandle.RespQ
+    		var cacheResp proj5.CacheResp
+            var ok bool
+
+            if classifierOk {
+                classHandle.ReqQ <- req
+                finalResp, ok := <-classHandle.RespQ
+            }
 
             if !ok {
                 classifierOk = false
@@ -55,8 +59,7 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
                 // Our cache crashed but our classifier is stil fine.  Don't need to do anything.
             } else if finalResp.Id != req.Id {
     			finalResp.Err = proj5.CreateMemErr(proj5.MemErr_serCorrupt, "Classifier Error", nil)
-    		} else {
-
+    		} else { // No problems with request, caching result
         		cacheWriteReq := proj5.CacheReq{true, reqKey, finalResp.Val, req.Id}
         		cacheHandle.ReqQ <- cacheWriteReq
             }
