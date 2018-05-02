@@ -39,7 +39,7 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
     			fmt.Printf("%s", "ERROR! Cache Response ID doesn't match Cache Request ID!")
     		}
     	} else { // Request is not in cache, calculate it and memoize it
-    		var cacheResp proj5.CacheResp
+    		var finalResp proj5.MnistResp
             var ok bool
 
             if classifierOk {
