@@ -3,7 +3,6 @@ package memoizer
 import (
 	"github.com/61c-teach/sp18-proj5"
 	"hash/crc64"
-	"fmt"
 )
 
 /* The simplest possible implementation that does anything interesting.
