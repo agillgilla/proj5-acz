@@ -21,10 +21,10 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
         var cacheResp proj5.CacheResp
         var ok bool
 
+
+        cacheReadReq := proj5.CacheReq{false, reqKey, 0, req.Id} 
         if cacheOk {
-        	cacheReadReq := proj5.CacheReq{false, reqKey, 0, req.Id} 
         	cacheHandle.ReqQ <- cacheReadReq
-        	
         	cacheResp, ok := <-cacheHandle.RespQ
         }
 
