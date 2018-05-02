@@ -35,8 +35,6 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
     		if cacheResp.Id == cacheReadReq.Id { // Id is correct (for out of order channel responses)
     			finalResp := proj5.MnistResp{cacheResp.Val, cacheReadReq.Id, nil}
     			memHandle.RespQ <- finalResp
-    		} else { // ERROR!
-    			fmt.Printf("%s", "ERROR! Cache Response ID doesn't match Cache Request ID!")
     		}
     	} else { // Request is not in cache, calculate it and memoize it
     		var finalResp proj5.MnistResp
