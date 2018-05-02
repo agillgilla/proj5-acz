@@ -18,7 +18,7 @@ func Memoizer(memHandle proj5.MnistHandle, classHandle proj5.MnistHandle, cacheH
 		crcTable := crc64.MakeTable(crc64.ECMA)
     	reqKey := crc64.Checksum(req.Val, crcTable)
     	//fmt.Printf("Checksum: %x \n", reqKey)
-        var cacheResp proj5.MnistResp
+        var cacheResp proj5.CacheResp
         var ok bool
 
         if cacheOk {
